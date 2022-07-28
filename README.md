@@ -1,6 +1,6 @@
 # SMA OpCon Template Repo Docs
 
-This repository contains the content behind the SMA OpCon Template Repo documentation hosted at <https://help.smatechnologies.com/opcon/template>.
+This repository contains the content behind the SMA OpCon ServiceNow Connector documentation hosted at <https://help.smatechnologies.com/opcon/connectors/servicenow>.
 
 ## Disclaimer
 
@@ -12,7 +12,7 @@ SMA Technologies assumes no liability for damage caused by the usage of any of t
 
 Copyright 2021 SMA Technologies
 
-This SMA OpCon Template Repo documentation is [Creative Commons licensed](LICENSE).
+This SMA OpCon ServiceNow Connector documentation is [Creative Commons licensed](LICENSE).
 
 ## Contribution
 
