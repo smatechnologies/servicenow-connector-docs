@@ -444,7 +444,7 @@ Before using the business rules, the authentication header in the updateJobStatu
 - First create the OpCon Application token (see OpCon-API documentation on how to create an application token). 
 - Select the **updateJobStatusByJobId** Outbound REST Message.
 - Select the postStatus HTTP Method.
-- Update the Authorization header attribute replacing the token value. Remember to keep the leading Token<space> values.
+- Update the Authorization header attribute replacing the token value. Remember to keep the leading 'Token ' values.
 
 #### Using Self-Signed Certificates
 It is possible to use self-signed certificates when working with OpCon. However, it is recommended that for production systems a certificate from an authorized CA supplier should be used.
@@ -455,8 +455,9 @@ When working with self-signed certificates, it is possible to use the provided s
 Using PowerShell, enter the following commands to create a self-signed certificate in the Personal section of the certIm (Certificates - local Computer) using the full DNS name and setting a password that can be used when moving the certificate.
 
 ```
-New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsname "<full dns name>"
-$pwd = ConvertTo-SecureString -String "<password>" -Force -AsPlainText
+New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsname "full dns name"
+$pwd = ConvertTo-SecureString -String "password" -Force -AsPlainText
+
 ```
 
 Once these commands have been processed, the certificate can be found by managing computer certificates.
