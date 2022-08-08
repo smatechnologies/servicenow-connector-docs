@@ -41,47 +41,29 @@ The ticket creation process consists of the following steps (see Ticket Creation
 ![Ticket Creation Process](/img/ticket-creation-process.png)
 
 
-Step 1:    
+**Step 1**:    
         
 * The ServiceNow Connector is executed by the Notification Manager when a failed task is detected. 
 
-* The Notification Manager uses the following standard OpCon properties to pass information to the ServiceNow Connector.
+* The Notification Manager uses the following standard OpCon properties to pass information to the ServiceNow Connector:
 
-#### $MACHINE NAME        
+| Property | Description |
+| -------- | ----------- |
+| $MACHINE NAME | The name of the Agent on which the task was executing |
+| $JOB TERMINATION | The termination code of the task |
+| $SCHEDULE DATE-SNOW | A special version of the Schedule Date format created to support ServiceNow Connector |
+| $SCHEDULE ID | The schedule ID of the workflow in the OpCon System |
+| $SCHEDULE INST | The schedule instance of the workflow in the Daily OpCon table |
+| $SCHEDULE NAME | The name of the workflow |
+| $JOB NAME | The name of the task |
 
-The name of the Agent on which the task was executing.
-
-#### $JOB TERMINATION     
-
-The termination code of the task.
-
-#### $SCHEDULE DATE-SNOW  
-
-A special version of the Schedule Date format created to support ServiceNow Connector.
-
-#### $SCHEDULE ID         
-
-The schedule ID of the workflow in the OpCon System.
-            
-#### $SCHEDULE INST       
-
-The schedule instance of the workflow in the Daily OpCon table.
-
-#### $SCHEDULE NAME		  
-
-The name of the workflow.
-
-#### $JOB NAME            
-
-The name of the task.
-
-Step 2:
+**Step 2**:
 
 * Before creating a new incident ticket, the ServiceNow Connector checks to see if an incident ticket has already been created for the task. 
 
 * The task information is extracted from the OpCon Daily Job table.
 
-Step 3:
+**Step 3**:
 
 * If an incident ticket exists, the existing incident ticket is retrieved from ServiceNow and a check is made to see if the incident ticket state is closed or canceled. If the incident ticket is either closed or canceled, a new ticket is created. 
 
@@ -89,15 +71,15 @@ Step 3:
 
 * When creating an incident ticket, the workflow name, the task name, the agent the task was executing on and the termination code are includedin the incident description. The correlation_display field is used to indicate that the request is from OpCon (sets the value to SMA_OPCON) and the correlation_id field is used to provide the identifier of the task that errored (includes the OpCon Rest-API address and the unique job id) allowing the business rules in the SMA OpCon ServiceNow Application to complete task status changes.
 
-Step 4:
+**Step 4**:
 
 * The returned incident number and sys_id fields are written into the Job Information Incident Ticket ID field of the OpCon task. If there was an existing ticket and a new ticket was created, the previous ticket number is written into the task documentation field.
 
-Step 5:
+**Step 5**:
 
 * If the rule **includeJobLogAttachment** is set to True, The ServiceNow Connector calls the OpCon Rest-API to retrieve the task’s job log and attaches this to the created or existing ServiceNow Incident ticket.
 
-Step 6:
+**Step 6**:
 
 * The SMA OpCon ServiceNow Application, provides Business Rules that are triggered when the state of the Incident ticket is changed. These business rules then submit outbound Rest message calls to the OpCon Rest-API to change the task status. 
 
