@@ -19,7 +19,7 @@ The following software levels are required to implement this version (21.x.x) of
 The installation process consists of the following steps:
 
 - OpCon Windows Agent Installation.
-- ServieNow Connector Installation.
+- ServiceNow Connector Installation.
 - ServiceNow Connector Configuration.
 - Template creation. 
 - OpCon Notification Manager Definition.
@@ -43,7 +43,7 @@ Create a directory /logfiles off the installation directory that will be used as
 Create the special **$SCHEDULE DATE-SNOW** global property that contains the schedule date in the yyyy-MM-dd format from the standard $SCHEDULE DATE property. Set the value to **yyyy-MM-dd**.
 
 ### ServiceNow Connector Configuration
-The configuration of the ServieNow Connector requires setting the OpCon connection information for the OpCon system associated with the connector.
+The configuration of the ServiceNow Connector requires setting the OpCon connection information for the OpCon system associated with the connector.
 
 All user and password values placed in the configuration and template files must be encrypted using the EncryptValue.exe utility provided with the connector. 
 
@@ -106,7 +106,7 @@ RET_PORT= 9010
 ```
 The PROXY CONNECTION section provides the information about a proxy server should this be required. The proxy server is defined using the USE_PROXY, PROXY_ADDRESS and PROXY_PORT statements.
 
-The OPCON API CONNECTION section provides the information about connecting to the OpCon System using the OpCon Rest-API so the job information can be retrieved and the job log can be retrieved and appended to the incident ticket using the **ATTACHMENT_URL** defined in the template. The SERVER statement defines the web server address and the PORT statement defines the web server port used. The USES_TLS statement indicates if the connection uses TLS. The TOKEN statement contains an application token (see OpCon Rest-API documentation on how to generate an application token). The RET_SERVER and RET_PORT values are used when implementing the capability for ServiceNow to report back to OpCon. These two values are used to generate the OpCon Rest-API address that is sent to ServiceNow.
+The OPCON API CONNECTION section provides the information about connecting to the OpCon System using the OpCon Rest-API so the job information can be retrieved and the job log can be retrieved and appended to the incident ticket using the **attachment** URL defined in the url section of the template. The SERVER statement defines the web server address and the PORT statement defines the web server port used. The USES_TLS statement indicates if the connection uses TLS. The TOKEN statement contains an application token (see OpCon Rest-API documentation on how to generate an application token). The RET_SERVER and RET_PORT values are used when implementing the capability for ServiceNow to report back to OpCon. These two values are used to generate the OpCon Rest-API address that is sent to ServiceNow.
 
 #### Templates
 Templates provide information about the definitions that are submitted to ServiceNow as part of the request. As it is possible to submit a request to an intermediate table instead of directly into the incident table, templates provide the capability to configure these differences.
@@ -125,17 +125,17 @@ Attribute Name Name | Value
 **includeTagRouting**                   | Indicates if User defined tags should be used for incident routing purposes. Value either true or false (default false). 
 **includeCorrelationId**                | Indicates if the correlation information should be included in the information submitted to EasyVista. Value either true or false (default false).
 **applicationIdRetrievalFromCmdb**      | Indicates if the application ID used during incident creation must be retrieved from the ServiceNow CMDB. Value either true or false (default false). 
-**allowTicketReopen**	                | Indicates if a ticket already exists for a failed task, should the ServiceNow ticket be in an appropriate state (not closed or cancelled) the ticket will be reopened. Value either true or false (default true).
+**allowTicketReopen**                   | Indicates if a ticket already exists for a failed task, should the ServiceNow ticket be in an appropriate state (not closed or cancelled) the ticket will be reopened. Value either true or false (default true).
 **extractAppIdFromScheduleName**        | Used in conjunction with the rule **applicationIdRetrievalFromCmdb** and indicates the value required to retrieve the application ID from the CMDB must be retrieved from the schedule name of the job. This attribute is mutually exclusive with the **extractAppliIdFromTagName** attribute. Value either true or false (default false).
 **extractAppIdFromTagName**             | Used in conjunction with the rule **applicationIdRetrievalFromCmdb** and  indicates the value required to retrieve the application ID from the CMDB must be retrieved from the first tag name in the tag list associated with the job. This attribute is mutually exclusive with the **extractAppliIdFromScheduleName** attribute. Value either true or false (default false).
 **extractXmlContentFromJobDescription** | This rule allows the extraction of xml content from the associated job documentation. The extracted content is appended to the description attribute submitted to ServiceNow. The **jobDescriptionXmlTag** attribute contains the name of the xml tag in the associated job documentation field. Value either true or false (default false).
-**routingByDocumentationContent**	    | This rule implements a specific routing requirement depending if the job documentation contains instructions on what action to take should the job fail. The instructions are contained within a set of xml tags. The xml tag name is defined in the  jobDescriptionXmlTag attribute. The **documentationRouting** attribute contains the routing information to be included in the ServiceNow object.
+**routingByDocumentationContent**       | This rule implements a specific routing requirement depending if the job documentation contains instructions on what action to take should the job fail. The instructions are contained within a set of xml tags. The xml tag name is defined in the  jobDescriptionXmlTag attribute. The **documentationRouting** attribute contains the routing information to be included in the ServiceNow object.
 **credentials**                         | header	
 **user**                                | The user which has the required privileges to connect to the ServiceNow System to submit requests. The name must be encrypted using the EncryptValue.exe utility.
 **password**                            | The password of the user which has the required privileges to connect to the ServiceNow System to submit requests. The password must be encrypted using the EncryptValue.exe utility .
-**appIdLocation**	                    | header - Used in conjunction with the rule **extractAppIdFromScheduleName**
-**startLocation**	                    | Indicates where in the schedule name of the failed job the string starts.
-**numberOfChars**	                    | Indicates the number of characters to extract.
+**appIdLocation**                       | header - Used in conjunction with the rule **extractAppIdFromScheduleName**
+**startLocation**                       | Indicates where in the schedule name of the failed job the string starts.
+**numberOfChars**                       | Indicates the number of characters to extract.
 **jobDescriptionXmlTag**                | header - Used in conjunction with the rule **extractXmlContentFromJobDescription**
 **xmlTag**                              | Is the name of the xml tag to search for in the associated job documentation.
 **urls**                                | header - Defines the urls to be when submitting requests to ServiceNow. NOTE The definition consists of name, value pairs.
@@ -150,7 +150,7 @@ Attribute Name Name | Value
 **tags**                                | header - Defines information if OpCon User defined Tags are to be used to include attributes in the ServiceNow submission. This is enabled if the rule **includeTagRouting** is set to True.
 **indicator**                           | Defines what part of the tag should be used to identify the request. Supports TAG_END,  TAG_START or DEFAULT. The DEFAULT value is used if there is no TAG_END or TAG_START match and TAG Routing is enabled.
 **indicatorValue**                      | The value that is matched to the OpCon User defined tag (either the end or the start).
-**attribute**	                        | Defines the attribute name that will be added to the JSON payload along with the value.
+**attribute**                           | Defines the attribute name that will be added to the JSON payload along with the value.
 **value**                               | The value associated with the attribute.
 **workingHours**                        | header - Defines what is working hours. Using these definitions allows the definitions of a different set of attributes for working and non-workings hours. Note Consists of start,stop pairs.
 **monday**	                            | header - Defines the start and stop hours for Monday.
@@ -159,16 +159,16 @@ Attribute Name Name | Value
 **tuesday**	                            | header - Defines the start and stop hours for Tuesday.
 **start**                               | The start time. Value consists of four digits (HHMM).
 **stop**                                | The start time. Value consists of four digits (HHMM)
-**wednesday**	                        | header - Defines the start and stop hours for Wednesday.
+**wednesday**                           | header - Defines the start and stop hours for Wednesday.
 **start**                               | The start time. Value consists of four digits (HHMM).
 **stop**                                | The start time. Value consists of four digits (HHMM)
-**thursday**	                        | header - Defines the start and stop hours for Thursday.
+**thursday**                            | header - Defines the start and stop hours for Thursday.
 **start**                               | The start time. Value consists of four digits (HHMM).
 **stop**                                | The start time. Value consists of four digits (HHMM)
 **friday**	                            | header - Defines the start and stop hours for Friday.
 **start**                               | The start time. Value consists of four digits (HHMM).
 **stop**                                | The start time. Value consists of four digits (HHMM)
-**saturday**	                        | header - Defines the start and stop hours for Saturday.
+**saturday**                            | header - Defines the start and stop hours for Saturday.
 **start**                               | The start time. Value consists of four digits (HHMM).
 **stop**                                | The start time. Value consists of four digits (HHMM)
 **sunday**	                            | header - Defines the start and stop hours for Sunday.
@@ -182,7 +182,7 @@ Attribute Name Name | Value
 **name**                                | An optional name, value pair, which is required if the rule **includeCorrelationId** is set to True. The name consists of correlation_id. This attribute is used to pass information to ServiceNow so ServiceNow can use the SMA ServiceNow OpCon Application to update job information. 
 **value**                               | Can be left as an empty string as the value is added by the connector.
 **name**                                | An optional name, value pair, which is required if the rule **includeCorrelationId** is set to True. The name consists of correlation_display. This attribute is used to pass information to ServiceNow so ServiceNow can use the SMA ServiceNow OpCon Application to update job information. 
-**value**	                            | Consists of the value SMA_OPEN which indicates to ServiceNow that the incident originated from OpCon.
+**value**                               | Consists of the value SMA_OPEN which indicates to ServiceNow that the incident originated from OpCon.
 **state**                               | A required name, value pair. The name consists of state. This is used if a failed task already has an existing ticket to reset the ticket state if this is allowed. 
 **value**                               | Can be left as an empty string as the value is added by the connector.
 **workingHoursAttributes**              | header - Defines the attributes that will be submitted during working hours. NOTE Consists of name value pairs
@@ -455,8 +455,8 @@ When working with self-signed certificates, it is possible to use the provided s
 Using PowerShell, enter the following commands to create a self-signed certificate in the Personal section of the certIm (Certificates - local Computer) using the full DNS name and setting a password that can be used when moving the certificate.
 
 ```
-New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsname "full dns name"
-$pwd = ConvertTo-SecureString -String "password" -Force -AsPlainText
+New-SelfSignedCertificate -certstorelocation cert:\\localmachine\\my -dnsname "\<***full dns name***\>"
+$pwd = ConvertTo-SecureString -String "\<***password***\>" -Force -AsPlainText
 
 ```
 

@@ -41,7 +41,7 @@ Requires **OpCon 20.7 STS** or greater due to OpCon-API requirements.
 					1 new rule added
 					"rules": {
 					   "extractAppIdFromTagName": false
-					},
+					}
 					
 **CONNUTIL-569**
                     Added new rule to extract an xml formatted string from the documentation associated with the job and appending this information to the description attribute submitted to ServiceNow.
@@ -53,7 +53,7 @@ Requires **OpCon 20.7 STS** or greater due to OpCon-API requirements.
 					new attribute to define the name of the xml tag in the job documentation
 				    "jobDescriptionXmlTag": {
 					  "xmlTag": "xmltagname"
-				    },
+				    }
 **CONNUTIL-571**
                     Implemented a new rule to support specific routing requirements based on if failed job instructions are present in the job documentation field.
 					Includes additions in the template to provide the functionality
