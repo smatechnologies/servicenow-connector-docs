@@ -217,6 +217,8 @@ Attribute Name Name | Value
 **workingHoursWithoutDoc**              | The destination if the job fails during working hours and has no instructions in the job documentation field.
 **nonWorkingHoursWithDoc**              | The destination if the job fails during nonworking hours and has valid instructions in the job documentation field.
 **nonWorkingHoursWithoutDoc**           | The destination if the job fails during non working hours and has no instructions in the job documentation field.
+**variables**                           | header - This defines variables required by the connector
+**incidentReopenState**                 | the state the incident will be set to when the incident is re-opened when a restarted failed task fails again (values are defined in ServiceNow - 1 is New, 2 is In-progress).
 
 The address section of the template defines a name associated with the ServiceNow Instance and the address associated with the ServiceNow Instance. This allows a single connector the ability to submit requests to multiple ServiceNow instances by creating multiple templates. The address section is a required attribute.
 
@@ -382,14 +384,16 @@ Template Example
     "name" : "cmdbsysid",
     "attribute" : "sys_id",
     "notation" : "result.sys_id"
-  }
- ],
+  } ],
   documentationRouting": {
     "routingAttribute": "",
     "workingHoursWithDoc": "",
     "workingHoursWithoutDoc": "",
     "nonWorkingHoursWithDoc": "",
     "nonWorkingHoursWithoutDoc": ""
+  },
+  "variables": {
+    "incidentReopenState": 1
   }
 }
 

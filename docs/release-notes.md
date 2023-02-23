@@ -1,4 +1,4 @@
-# Release Notes ServiceNow 21.2.0
+# Release Notes ServiceNow 21.2.1
 
 ## General
 
@@ -6,19 +6,24 @@ Requires **OpCon 20.7 STS** or greater due to OpCon-API requirements.
 
 ### New Features
 
-**CONNUTIL-581**
-                    Implement new rule alwaysCreateNewTicket to ensure a new ticket is created when a task that has a ticket fails again (this is a customer requirement).
-					Includes addition in the template to provide the functionality
-					1 new rule added
-					"rules": {
-					   "extractAppIdFromScheduleName": false,
-					   "alwaysCreateNewTicket": false
-					},
+**CONNUTIL-594**
+                    Implement configurable incident state when re-opening ServiceNow incident when restarted failed task fails.
+					Added variables section to template.
 
-					If this rule is enabled, a new ticket will always be created when a job already has a ticket assigned and it fails again.				    
+					"variables": {
+						"incidentReopenState": 1
+					}					  	    
 
+					value should be set to the state required by your organization when reopening the incident (1 is New, 2 is In-Progress)
 ### Fixes
 
+**CONNUTIL-585**
+                    Files not attached when restarted failed job fails again.
+**CONNUTIL-586**
+                    When updating information for a restarted failed task that fails again, only update the description.	
+**CONNUTIL-587**
+                    Failed task with exiting ticket in a 'Closed' or 'Cancelled' tries to insert new ticket number into the job information instead of updating the job information.	
+
 ### Migration Considerations
-The template used by the connector must be updated to include the new rule.
+The template used by the connector must be updated to include the new variable section.
 
