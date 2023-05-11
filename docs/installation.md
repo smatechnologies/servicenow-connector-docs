@@ -393,7 +393,8 @@ Template Example
     "nonWorkingHoursWithoutDoc": ""
   },
   "variables": {
-    "incidentReopenState": 1
+    "incidentReopenState": 1,
+    "cmdbQueryFieldAttributeName":"u_trigramme"
   }
 }
 
