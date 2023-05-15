@@ -2,7 +2,7 @@
 
 Once the ServiceNow connector has been installed and configured, there is very little operational requirements.
 
-## Adding Jobs to ServieNow Group in Notification Manager
+## Adding Jobs to ServiceNow Group in Notification Manager
 Depending on the Notification Manager configurations, newly defined jobs may need to be included in the ServiceNow Group.
 
 ## Viewing Incident Status
