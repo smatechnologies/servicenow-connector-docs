@@ -9,7 +9,7 @@ The ServiceNow Connector can be used to submit incident tickets automatically to
 ## Components
 The OpCon ServiceNow implementation includes components that detect when a task errors, create the ServiceNow Incident record (includes adding task job log) and automatically update the OpCon task status when the Incident record Status changes.
 
-![ServiceNow Component Overview](/img/servicenow-component-overview.png)
+![ServiceNow Component Overview](../static/img/servicenow-component-overview.png)
 
 ### Notification Manager
 An OpCon feature that initiates the ServiceNow Connector when a task encounters an error condition.
@@ -38,7 +38,7 @@ Part of a ServiceNow OpCon application that contains Outbound Rest Messages to c
 ## Ticket Creation Process
 The ticket creation process consists of the following steps (see Ticket Creation Process diagram).
 
-![Ticket Creation Process](/img/ticket-creation-process.png)
+![Ticket Creation Process](../static/img/ticket-creation-process.png)
 
 
 **Step 1**:    
