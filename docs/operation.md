@@ -14,3 +14,14 @@ In the Job Selection Dialogue ‘click’ on the Incident Ticket value.
 
 If required enter the user / password for ServiceNow and the ServiceNow ticket information will be displayed.
 
+## Incident States updates
+If an Incident ticket already exists for the failed job and update of ServiceNow Incident tickets is allowed the state of the existing Incident ticket will me modified as follows:
+
+Current State | New State     | Description
+------------- | ------------- | -----------------------
+New           | no change     | Incident Ticket will remain in the New state.
+In-Progress   | no change     | Incident Ticket will remain in the In-Progress state.
+On-Hold       | no change     | Incident Ticket will remain in the On-Hold state.
+Resolved      | In-Progress   | Incident Ticket state will be changed to In-Progress.
+Cancelled     |               | A new Incident Ticket will be created.
+Closed        |               | A new Incident Ticket will be created.
