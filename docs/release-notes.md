@@ -1,9 +1,24 @@
-# Release Notes ServiceNow 21.2.1
+# Release Notes 
 
 ## General
 
 Requires **OpCon 20.7 STS** or greater due to OpCon-API requirements.
 
+## Release 21.4
+
+### New Features
+
+**CONNUTIL-614**
+                    Adjusted actions when a ticket exists and re-open of a ticket is allowed:
+					- incident state New, In-Progress or On-Hold, no state change and log files are appended to the existing incident ticket.
+					- incident state Resolved, state changed to In-Progress and log files appended to the existing incident ticket.
+					- incident state Cancelled or Closed, new incident created and log files appended to the new incident ticket.
+
+### Fixes
+
+**CONNUTIL-6i5**
+                    Fixed a problem where updating or inserting ticket information into the OpCon job record always returned a false value.
+					
 ## Release 21.3
 
 ### New Features
