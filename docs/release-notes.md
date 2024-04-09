@@ -4,6 +4,22 @@
 
 Requires **OpCon 20.7 STS** or greater due to OpCon-API requirements.
 
+## Release 21.5
+
+### New Features
+
+**CONNUTIL-621**
+                    Added a new attribute tagIdPrefix to the appIdLocation structure. The attribute can be used to identify the tag that contains the application id. The value of the attribute is used to match the start characters of the tag. The first tag in the list that matches will be used.
+```
+  
+  "appIdLocation": {
+    "startLocation": 6,
+    "numberOfChars": 3,
+    "tagIdPrefix": "TAG002"
+  },
+
+```
+
 ## Release 21.4
 
 ### New Features

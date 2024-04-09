@@ -137,6 +137,7 @@ Attribute Name Name | Value
 **appIdLocation**                       | header - Used in conjunction with the rule **extractAppIdFromScheduleName**
 **startLocation**                       | Indicates where in the schedule name of the failed job the string starts.
 **numberOfChars**                       | Indicates the number of characters to extract.
+**tagIdPrefix**                         | Contains a character string that can be used to match against the start of a tag name to determine which tag contains the indicator to use for the CMDB match.  
 **jobDescriptionXmlTag**                | header - Used in conjunction with the rule **extractXmlContentFromJobDescription**
 **xmlTag**                              | Is the name of the xml tag to search for in the associated job documentation.
 **urls**                                | header - Defines the urls to be when submitting requests to ServiceNow. NOTE The definition consists of name, value pairs.
@@ -269,7 +270,8 @@ Template Example
   },
     "appIdLocation": {
     "startLocation": 2,
-    "numberOfChars": 3
+    "numberOfChars": 3,
+    "tagIdPrefix":"TAG002"
   },
   "jobDescriptionXmlTag": {
     "xmlTag": ""
