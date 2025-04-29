@@ -4,12 +4,45 @@
 
 Requires **OpCon 20.7 STS** or greater due to OpCon-API requirements.
 
+## Release 25.0
+
+This release is completely rebased removing the old opcon-rest-api-client library replacing it with direct calls to the OpCon Rest-API.
+
+### New Features
+
+**INTPLT-387**
+                    Remove old opcon-rest-api-client library replacing with direct rest-api calls. This removes the old library and replaces all OpCon communications
+					with OpCon Rest-api (to retrieve DailyJob information, to update DailyJob Incident value, to retrieve log files).
+
+### Fixes
+
+**INTPLT-413**
+                    Change attribute 'state' to 'initial-state' when reopening incident ticket.
+					When reopen incident ticket is enabled, the variable value incidentReopenState from the variables section of the template will be used to indicate the incident state. 
+					If this variable is not defined the default value of 2 will be used (IN PROGRESS).
+
+					Incident states
+					1	NEW
+					2	IN PROGRESS
+					3	ON HOLD
+					6	RESOLVED
+					7	CLOSED
+					8	CANCELLED
+
+```
+"variables": {
+    "incidentReopenState": 2
+  }
+
+```
+
 ## Release 21.5
 
 ### New Features
 
 **CONNUTIL-621**
                     Added a new attribute tagIdPrefix to the appIdLocation structure. The attribute can be used to identify the tag that contains the application id. The value of the attribute is used to match the start characters of the tag. The first tag in the list that matches will be used.
+
 ```
   
   "appIdLocation": {
@@ -19,6 +52,7 @@ Requires **OpCon 20.7 STS** or greater due to OpCon-API requirements.
   },
 
 ```
+### Fixes
 
 ## Release 21.4
 
