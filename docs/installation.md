@@ -344,9 +344,6 @@ Template Example
   }, {
     "name" : "correlation_display",
     "value" : "SMA_OPCON"
-  }, {
-    "name" : "state",
-    "value" : ""
   } ],
   "workingHoursAttributes" : [ {
     "name" : "urgency",
