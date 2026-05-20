@@ -14,6 +14,15 @@ tags:
 
 Requires **OpCon 20.7 STS** or greater due to OpCon-API requirements.
 
+## 26
+
+### 26.0
+
+### What's new
+
+:eight_spoked_asterisk: **CON-1331**: Remove vulnerabiity CVE-2022-41404.
+
+
 ## 25
 
 ### 25.0
