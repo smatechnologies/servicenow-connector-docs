@@ -1,4 +1,10 @@
 ---
+title: ServiceNow Connector
+description: "Raise and update ServiceNow incidents from OpCon job failures: installation, templates, Notification Manager setup, and the ServiceNow application."
+tags:
+  - Conceptual
+  - System Administrator
+  - ServiceNow Connector
 slug: '/'
 sidebar_label: 'ServiceNow Connector'
 hide_table_of_contents: true

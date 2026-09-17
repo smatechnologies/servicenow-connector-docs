@@ -64,8 +64,8 @@ Part of an SMA OpCon ServiceNow Application that contains business rules trigger
 
 - OpConTicketAccepted
 - OpConTicketResolved
-- OpConTicketRelease
-- OpConTicketCanceled
+- OpConTicketRestart
+- OpConTicketCancelled
 
 The business rules submit outbound Rest messages back to OpCon. See [Business rules in detail](#business-rules-in-detail) below.
 
@@ -73,10 +73,10 @@ The business rules submit outbound Rest messages back to OpCon. See [Business ru
 
 Part of an SMA OpCon ServiceNow Application that contains outbound Rest messages used to communicate with OpCon through the OpCon Rest-API. They update the task status, and provide additional messages that other ServiceNow applications can use to instruct OpCon:
 
-- updateJobStatusById
+- updateJobStatusByJobId
 - buildSchedule
 - getDailyScheduleByNameAndDate
-- addJobToScheduleInDaily
+- AddJobToScheduleInDaily
 - getApiVersion
 
 ## Ticket creation process
@@ -119,7 +119,7 @@ Before creating a new incident ticket, the connector checks whether one has alre
 If an incident ticket exists, the connector retrieves it from ServiceNow and checks its state.
 
 - If the incident is **closed** or **cancelled**, a new incident is created. The previous ticket number is added to the task documentation and to the new incident's description.
-- Otherwise, the existing incident is updated with the new task error information and reopened (state set to **New**).
+- Otherwise, the existing incident is updated with the new task error information. A **Resolved** incident is reopened and its state is set from the `incidentReopenState` template variable, which defaults to **In Progress**. An incident already in **New**, **In Progress** or **On Hold** keeps its state. See [Installation](./installation.md) for the variable.
 
 When creating an incident, the connector includes the workflow name, task name, agent name, and termination code in the incident description. Two ServiceNow fields are populated to enable the SMA OpCon ServiceNow Application to call back into OpCon:
 
@@ -149,8 +149,8 @@ The SMA OpCon ServiceNow Application provides business rules that are triggered 
 | --- | --- | --- |
 | **OpConTicketAccepted** | Incident state changes from **New** to **In Progress**. | Task status set to `markUnderReview` (the problem is being worked on). |
 | **OpConTicketResolved** | Incident state changes from **In Progress** to **Resolved**. | Task status set to `markFixed`. The task can then be restarted. |
-| **OpConTicketRelease** | Incident state changes from **In Progress** to **Resolved**. | Task is restarted. (Alternate rule to OpConTicketResolved.) |
-| **OpConTicketCanceled** | Incident state changes to **Canceled**. | Task is cancelled. |
+| **OpConTicketRestart** | Incident state changes from **In Progress** to **Resolved**. | Task is restarted. (Alternate rule to OpConTicketResolved — activate one or the other, not both.) |
+| **OpConTicketCancelled** | Incident state changes to **Cancelled**. | Task is cancelled. |
 
 #### Incident description and access
 

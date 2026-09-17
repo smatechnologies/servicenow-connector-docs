@@ -29,19 +29,19 @@ You can display the status of the Incident directly from OpCon by using Solution
 
 To view the incident status for a failed job, complete the following steps:
 
-1. In Solution Manager, select the failed job and right-click to open the Job Selection dialog.
+1. In Solution Manager, right-click the failed job to open the Job Selection dialog.
 2. In the Job Selection dialog, select the **Incident Ticket** value.
 3. If required, enter the user and password for ServiceNow. The ServiceNow ticket information is displayed.
 
 ## Incident state updates
 
-If an Incident ticket already exists for the failed job and update of ServiceNow Incident tickets is allowed, the state of the existing Incident ticket is modified as follows:
+If an Incident ticket already exists for the failed job and update of ServiceNow Incident tickets is allowed (the `allowTicketReopen` template rule), the state of the existing Incident ticket is modified as follows:
 
 | Current state | New state | Description |
 | --- | --- | --- |
 | New | no change | Incident Ticket remains in the New state. |
 | In-Progress | no change | Incident Ticket remains in the In-Progress state. |
 | On-Hold | no change | Incident Ticket remains in the On-Hold state. |
-| Resolved | In-Progress | Incident Ticket state is changed to In-Progress. |
+| Resolved | In-Progress | Incident Ticket state is changed to the state set by the `incidentReopenState` template variable. In-Progress is the default. |
 | Cancelled | (new ticket) | A new Incident Ticket is created. |
 | Closed | (new ticket) | A new Incident Ticket is created. |
