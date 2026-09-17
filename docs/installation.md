@@ -16,23 +16,23 @@ tags:
 This page covers the end-to-end installation of the ServiceNow Connector — installing the connector and its supporting Windows Agent, configuring the connection to OpCon and ServiceNow, and importing the SMA OpCon ServiceNow Application into your ServiceNow instance.
 
 - Use this page when installing the ServiceNow Connector for the first time.
-- Use this page when configuring a self-signed certificate for the OpCon-to-ServiceNow connection.
+- Use this page when configuring a self-signed certificate so that ServiceNow can trust the OpCon Rest-API for its callback messages.
 
 For a conceptual overview of how the connector works at runtime, see the [ServiceNow Connector overview](./overview.md).
 
 ## Before you begin
 
-The following software levels are required to implement this version (21.x.x) of the ServiceNow Connector:
+The following software levels are required to implement the ServiceNow Connector:
 
 | Component | Requirement |
 | --- | --- |
-| OpCon | Release 21.0 or higher |
+| OpCon | Release 20.7 STS or higher, required by the OpCon Rest-API calls the connector makes |
 | OpCon Rest-API | Configured to use TLS |
 | OpCon Windows Agent | Installed on the same Windows server as the ServiceNow Connector |
 | OpCon Notification Manager | Available |
 | Java | Embedded OpenJDK 11 (part of the connector installation) |
 | ServiceNow | An instance that supports the Rest API |
-| ServiceNow credentials | A user with privileges to submit incidents and attachments — encrypted using `EncryptValue.exe` |
+| ServiceNow credentials | A user with privileges to submit incidents and attachments — encoded using `EncryptValue.exe` |
 
 ## Installation checklist
 
@@ -45,7 +45,7 @@ The installation is broken into six phases. Complete them in order — each phas
 | 3 | [Configure the connector](#servicenow-connector-configuration) (Connector.config + at least one template) | Target Windows server |
 | 4 | [Define the Notification Manager rule](#opcon-notification-manager-definition) | OpCon Solution Manager |
 | 5 | [Import the SMA OpCon ServiceNow Application](#servicenow-sma-opcon-application-installation) | ServiceNow instance |
-| 6 | [Configure self-signed certificates](#using-self-signed-certificates) (only if not using a CA certificate) | OpCon and ServiceNow |
+| 6 | [Configure self-signed certificates](#using-self-signed-certificates) (only if the OpCon Rest-API does not use a CA certificate) | OpCon and ServiceNow |
 
 ## OpCon Windows Agent installation
 
@@ -53,7 +53,7 @@ The ServiceNow Connector requires the installation of a Windows Agent on the sam
 
 ## ServiceNow Connector installation
 
-The ServiceNow Connector can be installed on any Windows Server, as long as there is an OpCon MSLSAM Agent installed on that Windows Server.
+The ServiceNow Connector can be installed on any Windows Server, as long as there is an OpCon Windows Agent installed on that Windows Server.
 
 To install the connector files, complete the following steps:
 
@@ -65,16 +65,18 @@ After the extraction, the root installation directory contains:
 | Item | Purpose |
 | --- | --- |
 | `SMASnowConnector.exe` | Connector executable. |
-| `EncryptValue.exe` | Encryption utility for credentials. |
+| `EncryptValue.exe` | Credential encoding utility. |
 | `Connector.config` | Configuration file (described below). |
 | `java/` | Java software required to run the connector (OpenJDK 11). |
-| `joblogs/` | Temporary storage for job logs extracted from the OpCon system. |
+| `logfiles/` | Temporary storage for job logs retrieved from the OpCon system, named by the `LOG_FILES_DIRECTORY` setting. |
 | `log/` | Connector log files. |
 | `templates/` | ServiceNow template files. Includes an initial `basic.json` template that you can modify. |
 
-### Create the logfiles directory
+### Check the logfiles directory
 
-Create a `/logfiles` directory off the installation directory. This directory is used as temporary storage when attaching job log files to incident tickets.
+The connector uses a `logfiles` directory under the installation directory as temporary storage when attaching job log files to incident tickets. If the extracted package does not contain one, create it.
+
+The directory name must match the `LOG_FILES_DIRECTORY` setting in `Connector.config`, which the supplied file sets to `logfiles`.
 
 ### Create the $SCHEDULE DATE-SNOW global property
 
@@ -88,14 +90,22 @@ Configuring the ServiceNow Connector involves two files:
 - One or more template files in `templates/` — define each ServiceNow instance and the rules used to create incidents.
 
 :::caution
-All user and password values placed in the configuration and template files must be encrypted using the `EncryptValue.exe` utility provided with the connector.
+All user and password values placed in the configuration and template files must be encoded using the `EncryptValue.exe` utility provided with the connector. Do not enter them as plain text.
 :::
 
 ### EncryptValue utility
 
-The `EncryptValue` utility uses standard 64-bit encryption. It supports a `-v` argument and displays the encrypted value.
+The `EncryptValue` utility supports a `-v` argument and displays the encoded value.
 
-On Windows, the following example shows how to encrypt the value `abcdefg`:
+:::caution
+
+Despite its name, `EncryptValue.exe` **encodes** values rather than encrypting them. It applies no cipher and uses no key, so anyone who can read `Connector.config` or a template can recover the original value. Encoding stops a credential being read at a glance, and that is all it does.
+
+Restrict access to the configuration file and the templates with operating system permissions, and treat every credential in them as recoverable.
+
+:::
+
+On Windows, the following example shows how to encode the value `abcdefg`:
 
 ```
 EncryptValue.exe -v abcdefg
@@ -141,6 +151,8 @@ The `RET_SERVER` and `RET_PORT` values are combined to form the OpCon Rest-API a
 
 #### Example `Connector.config`
 
+Replace every value in angle brackets with your own.
+
 ```
 [GENERAL]
 LOG_FILES_DIRECTORY=logfiles
@@ -149,16 +161,16 @@ DEBUG=OFF
 
 [PROXY CONNECTION]
 USE_PROXY=True
-PROXY_ADDRESS=10.200.180.18
+PROXY_ADDRESS=<proxy-server>
 PROXY_PORT=8080
 
 [OPCON API CONNECTION]
-SERVER=50.17.60.164
-PORT= 9010
+SERVER=<opcon-api-server>
+PORT=9010
 USES_TLS=True
-TOKEN=35f3b848-1991-40ad-be7f-9631b7da5eda
-RET_SERVER=50.17.60.164
-RET_PORT= 9010
+TOKEN=<opcon-api-application-token>
+RET_SERVER=<opcon-server-dns-name>
+RET_PORT=9010
 
 
 ```
@@ -190,17 +202,21 @@ A minimum working template includes: `address`, `rules`, `credentials`, `urls`, 
 
 **Required.** Defines which functions are supported by the connector. All rules have defaults — only set the rules you want to change.
 
+:::note
+Job log attachment is off by default. The example template further down this page switches it on, so a template based on the example attaches job logs and a minimal template built from this table does not.
+:::
+
 | Rule | Description | Default |
 | --- | --- | --- |
-| **includeJobLogAttachment** | Indicates whether the job log should be attached to the incident ticket. | `true` |
+| **includeJobLogAttachment** | Indicates whether the job log should be attached to the incident ticket. | `false` |
 | **includeTagRouting** | Indicates whether user-defined tags should be used for incident routing. | `false` |
-| **includeCorrelationId** | Indicates whether correlation information should be included in the information submitted to EasyVista. | `false` |
+| **includeCorrelationId** | Indicates whether correlation information should be included in the information submitted to ServiceNow. Required for the SMA OpCon ServiceNow Application to call back into OpCon. | `false` |
 | **applicationIdRetrievalFromCmdb** | Indicates whether the application ID used during incident creation must be retrieved from the ServiceNow CMDB. | `false` |
 | **allowTicketReopen** | Indicates whether, if a ticket already exists for a failed task and the ServiceNow ticket is in an appropriate state (not closed or cancelled), the ticket should be reopened. | `true` |
 | **extractAppIdFromScheduleName** | Used with **applicationIdRetrievalFromCmdb**. Indicates that the value used to retrieve the application ID from the CMDB must be retrieved from the schedule name of the job. Mutually exclusive with **extractAppIdFromTagName**. | `false` |
 | **extractAppIdFromTagName** | Used with **applicationIdRetrievalFromCmdb**. Indicates that the value used to retrieve the application ID from the CMDB must be retrieved from the first tag name in the tag list associated with the job. Mutually exclusive with **extractAppIdFromScheduleName**. | `false` |
 | **extractXmlContentFromJobDescription** | Allows the extraction of XML content from the associated job documentation. The extracted content is appended to the description attribute submitted to ServiceNow. The **jobDescriptionXmlTag** attribute contains the name of the XML tag in the associated job documentation field. | `false` |
-| **routingByDocumentationContent** | Implements a specific routing requirement based on whether the job documentation contains instructions on what action to take should the job fail. The instructions are contained within a set of XML tags. The XML tag name is defined in the `jobDescriptionXmlTag` attribute. The **documentationRouting** attribute contains the routing information to be included in the ServiceNow object. | — |
+| **routingByDocumentationContent** | Implements a specific routing requirement based on whether the job documentation contains instructions on what action to take should the job fail. The instructions are contained within a set of XML tags. The XML tag name is defined in the `jobDescriptionXmlTag` attribute. The **documentationRouting** attribute contains the routing information to be included in the ServiceNow object. | `false` |
 | **alwaysCreateNewTicket** | Indicates whether a new ticket must be created if the failed job already has an existing ticket assigned. | `false` |
 
 #### `credentials`
@@ -209,8 +225,8 @@ A minimum working template includes: `address`, `rules`, `credentials`, `urls`, 
 
 | Attribute | Description |
 | --- | --- |
-| **user** | The user that has the required privileges to connect to the ServiceNow System to submit requests. Must be encrypted using `EncryptValue.exe`. |
-| **password** | The password of the user that has the required privileges to connect to the ServiceNow System to submit requests. Must be encrypted using `EncryptValue.exe`. |
+| **user** | The user that has the required privileges to connect to the ServiceNow System to submit requests. Must be encoded using `EncryptValue.exe`. |
+| **password** | The password of that user. Must be encoded using `EncryptValue.exe`. |
 
 #### `appIdLocation`
 
@@ -238,7 +254,7 @@ A minimum working template includes: `address`, `rules`, `credentials`, `urls`, 
 | --- | --- | --- | --- |
 | **incident** | Required | URL used when submitting a POST or PUT to ServiceNow (creating or updating an incident). | `api/now/table/incident` |
 | **getincident** | Required | URL used when submitting a GET to ServiceNow (retrieving an existing incident). | `api/now/table/incident` |
-| **attachment** | Optional (required if **includeJobLogAttachment** is `true`) | URL used when attaching the OpCon job log to the ticket. | `api/now/table/incident` |
+| **attachment** | Optional (required if **includeJobLogAttachment** is `true`) | URL used when attaching the OpCon job log to the ticket. | `api/now/attachment/file` |
 | **cmdb** | Optional (required if **applicationIdRetrievalFromCmdb** and **extractAppIdFromScheduleName** are `true`) | URL used when retrieving the application id from the CMDB. | `api/now/cmdb` |
 
 If your site does not use an intermediate table for creating incidents, the **incident** and **getincident** values are the same.
@@ -274,8 +290,8 @@ The `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, and `sun
 | **short_description** | Required | Default value: `OpCon Task Failure (schedule {0} job {1} server {2} error code {3})`. The placeholders are filled in by the connector with the schedule, job, server, and error code. The text can be changed, but consider the placeholder positions. |
 | **description** | Required | Default value: `Technical data of the Opcon batch (schedule ({0}) job ({1}) server ({2}) error code ({3}) date ({4}) JOBID={5})`. The placeholders are filled in by the connector with the schedule, job, server, date, error code, and unique job id. The text can be changed, but consider the placeholder positions. |
 | **correlation_id** | Optional (required if **includeCorrelationId** is `true`) | Used to pass information to ServiceNow so that the SMA ServiceNow OpCon Application can update job information. The value can be left as an empty string — the connector adds it. |
-| **correlation_display** | Optional (required if **includeCorrelationId** is `true`) | Used to pass information to ServiceNow so that the SMA ServiceNow OpCon Application can update job information. Set to `SMA_OPEN` to indicate that the incident originated from OpCon. |
-| **state** | Required | Used when a failed task already has an existing ticket — the ticket state is reset if allowed. The value can be left as an empty string — the connector adds it. |
+| **correlation_display** | Optional (required if **includeCorrelationId** is `true`) | Used to pass information to ServiceNow so that the SMA ServiceNow OpCon Application can update job information. Set to `SMA_OPCON` to indicate that the incident originated from OpCon. The SMA OpCon ServiceNow Application matches on this value before calling back into OpCon, so it must be exact. |
+| **state** | Optional | Accepted and ignored. It is retained so that existing templates keep working. The state a reopened incident moves to is set by the **incidentReopenState** variable in the [`variables`](#variables) section. |
 
 #### `workingHoursAttributes` and `nonWorkingHoursAttributes`
 
@@ -317,15 +333,22 @@ The `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, and `sun
 
 | Attribute | Description |
 | --- | --- |
-| **incidentReopenState** | The state the incident is set to when it is reopened after a restarted failed task fails again. Values are defined in ServiceNow — `1` is New, `2` is In-progress. |
+| **incidentReopenState** | The state the incident is set to when it is reopened after a restarted failed task fails again. Values are defined in ServiceNow — `1` is New, `2` is In-progress. If the variable is not set, the connector uses `2` (In-progress). |
+| **cmdbQueryFieldAttributeName** | The name of the CMDB field the connector matches the extracted application ID against. Used only when **applicationIdRetrievalFromCmdb** is `true`. If the variable is not set, the connector uses `u_trigramme`. |
+
+:::caution
+The `u_trigramme` fallback is a site-specific field name. If you enable **applicationIdRetrievalFromCmdb**, set **cmdbQueryFieldAttributeName** to the field your own CMDB uses — otherwise the lookup queries a field that probably does not exist on your instance.
+:::
 
 #### Example template
+
+Replace every value in angle brackets with your own, and encode both credentials with `EncryptValue.exe` before entering them.
 
 ```
 {
   "address" : {
     "name" : "production",
-    "value" : "dev70313.service-now.com"
+    "value" : "<your-instance>.service-now.com"
   }, 
   "rules" : {
     "includeJobLogAttachment" : true,
@@ -339,8 +362,8 @@ The `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, and `sun
     "routingByDocumentationContent": false
   },
   "credentials" : {
-    "user" : "595752746157343d",
-    "password" : "55335268636c6468636e4e534f574e7263773d3d"
+    "user" : "<encoded-servicenow-user>",
+    "password" : "<encoded-servicenow-password>"
   },
     "appIdLocation": {
     "startLocation": 2,
@@ -458,7 +481,7 @@ The `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, and `sun
     "attribute" : "sys_id",
     "notation" : "result.sys_id"
   } ],
-  documentationRouting": {
+  "documentationRouting": {
     "routingAttribute": "",
     "workingHoursWithDoc": "",
     "workingHoursWithoutDoc": "",
@@ -481,7 +504,7 @@ To configure the Notification Manager rule, complete the following steps:
 
 1. Open Notification Manager and select the **Jobs** tab.
 2. Create a new **Group** called **ServiceNow**.
-3. Select the **ServiceNow** group, right-click, and select **Add Job Trigger**.
+3. Right-click the **ServiceNow** group and select **Add Job Trigger**.
 4. In the **Add Job Trigger** selection, select **Job Failed**.
 5. Select the **Run Command** tab and enter the following values:
 
@@ -495,7 +518,7 @@ The command arguments resolve as follows:
 
 | Argument | Resolves to |
 | --- | --- |
-| `C:\Connectors\ServiceNow\SMASnowConnector.exe` | The location of the connector. <!-- TODO: SME review — original referenced C:\Connectors\EasyVista\EasyVista.exe; updated to match the ServiceNow connector path used elsewhere on this page. Confirm correct path. --> |
+| `C:\Connectors\ServiceNow\SMASnowConnector.exe` | The location of the connector. |
 | `-a [[$MACHINE NAME]]` | The agent name. |
 | `-s [[$SCHEDULE NAME]]` | The schedule name. |
 | `-jn [[$JOB NAME]]` | The job name. |
@@ -503,7 +526,7 @@ The command arguments resolve as follows:
 | `-sd [[$SCHEDULE DATE-SNOW]]` | The date (format `YYYY-MM-DD`). |
 | `-si [[$SCHEDULE ID]]` | The schedule ID. |
 | `-sn [[$SCHEDULE INST]]` | The schedule instance. |
-| `-t basic.json` | The template in the `templates` folder to use. <!-- TODO: SME review — original example listed -t bas_easyvista.json in the table while the command shows -t basic.json. Aligned to basic.json; confirm. --> |
+| `-t basic.json` | The template in the `templates` folder to use. |
 
 ## ServiceNow SMA OpCon Application installation
 
@@ -511,7 +534,7 @@ The ServiceNow SMA Application provides business rules and outbound Rest message
 
 ### Download the application
 
-The application can be downloaded from the `opcon-servicenow-custom-application` repository in the SMA Technologies Innovation Lab (https://github.com/SMATechnologies).
+The application can be downloaded from the [`opcon-servicenow-custom-application` repository](https://github.com/SMATechnologies/opcon-servicenow-custom-application) in the SMA Technologies Innovation Lab.
 
 To download the application:
 
@@ -559,7 +582,11 @@ To update the authentication header, complete the following steps:
 
 ## Using self-signed certificates
 
-It is possible to use self-signed certificates when working with OpCon. However, for production systems, a certificate from an authorized CA supplier is recommended.
+This procedure exists so that **ServiceNow can trust your OpCon server's certificate** when the SMA OpCon ServiceNow Application sends its callback messages to the OpCon Rest-API. ServiceNow verifies the certificate it is presented with, so the OpCon server's certificate has to be one ServiceNow accepts.
+
+Steps 1 to 4 prepare the certificate on the OpCon server. Steps 5 and 6 load it into ServiceNow and set the ServiceNow properties that govern how it is verified. Complete the procedure only if the OpCon Rest-API is not already using a certificate from an authorized CA supplier.
+
+For production systems, a certificate from an authorized CA supplier is recommended — it removes the need for steps 1 to 4 and for the ServiceNow property changes in step 6.
 
 When working with self-signed certificates, you can either:
 
@@ -576,11 +603,12 @@ This is a six-step process that touches both Windows certificate stores and Serv
 
 Using PowerShell, run the following commands to create a self-signed certificate in the **Personal** section of `certlm` (Certificates — local Computer) using the full DNS name. Set a password that can be used when moving the certificate.
 
+```powershell
+New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsname "<full-dns-name>"
+$pwd = ConvertTo-SecureString -String "<password>" -Force -AsPlainText
 ```
-New-SelfSignedCertificate -certstorelocation cert:\\localmachine\\my -dnsname "\<***full dns name***\>"
-$pwd = ConvertTo-SecureString -String "\<***password***\>" -Force -AsPlainText
 
-```
+Keep the `$pwd` value — you need the same password when you export the certificate in the next step.
 
 Once these commands have been processed, the certificate can be found by managing computer certificates. The certificate must be moved from the **Personal** section to the **Trusted Root Certification** section.
 
@@ -625,7 +653,7 @@ To register the new certificate, complete the following steps:
    :::
 
 5. Open an administrator `cmd` window.
-6. Run the `C:\Program Files\OpConxps\SAM>SMAOpConRestApi.Controllers.exe setcertificate` command. You may see some errors, but the key items to check are:
+6. From the `C:\Program Files\OpConxps\SAM` directory, run `SMAOpConRestApi.Controllers.exe setcertificate`. You may see some errors, but the key items to check are:
    - `SSL Certificate successfully deleted`
    - `SSL Certificate successfully added`
 7. Restart the **SMA OpCon RestAPI** service.
@@ -634,7 +662,7 @@ To register the new certificate, complete the following steps:
 
 To export the public key and load it into ServiceNow, complete the following steps:
 
-1. In `certlm`, right-click the certificate and select **All Tasks** then **Export**. You should only be allowed to export the public key.
+1. In `certlm`, right-click the certificate and select **All Tasks**, then **Export**. You should only be allowed to export the public key.
 2. Select the **DER encoded binary X.509 (.CER)** format and save the exported file (the file will have a `.cer` extension).
 3. In your ServiceNow application, enter `certificates` in the **Filter navigator**.
 4. Select the **New** button.
