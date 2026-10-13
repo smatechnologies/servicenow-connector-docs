@@ -20,6 +20,14 @@ This history covers releases from 21.2.1 onwards. Earlier releases are not docum
 
 ## 26
 
+### 26.1
+
+**Released:** 2026 October
+
+#### Fixes
+
+- **CON-1332**: Removed vulnerability CVE-2023-51074 in the json-path library, which could allow a crafted JSON path expression to cause a denial of service. The json-path library was updated from 2.4.0 to 2.9.0. No configuration changes are required.
+
 ### 26.0
 
 **Released:** 2026 May
